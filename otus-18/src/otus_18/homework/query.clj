@@ -1,8 +1,8 @@
 (ns otus-18.homework.query
   (:require [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]
-            [com.github.seancorfield.honeysql :as hsql]
-            [com.github.seancorfield.honeysql.helpers :as h]
+            [honey.sql :as hsql]
+            [honey.sql.helpers :as h]
             [otus-18.homework.db :as db]))
 
 ;; Query constructor for Pokemon data

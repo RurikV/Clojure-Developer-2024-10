@@ -19,6 +19,13 @@
   (repl/rollback (load-config db-spec)))
 
 (defn rollback-all
-  "Rollback all migrations"
+  "Rollback all migrations by repeatedly calling rollback.
+   This is a simple implementation that assumes there won't be more than 100 migrations."
   [db-spec]
-  (repl/rollback-all (load-config db-spec)))
+  (let [config (load-config db-spec)]
+    (dotimes [_ 100]
+      (try
+        (repl/rollback config)
+        (catch Exception _
+          (println "All migrations have been rolled back")
+          (reduced nil))))))

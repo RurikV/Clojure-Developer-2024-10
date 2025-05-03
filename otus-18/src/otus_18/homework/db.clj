@@ -26,7 +26,7 @@
    :host "localhost"
    :port 5432
    :user "postgres"
-   :password "postgres"})
+   :password "pwd"})
 
 ;; Create a connection pool
 (def datasource (jdbc/get-datasource db-spec))

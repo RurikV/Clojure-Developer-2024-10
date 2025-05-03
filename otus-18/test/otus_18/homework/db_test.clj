@@ -12,7 +12,7 @@
    :host "localhost"
    :port 5432
    :user "postgres"
-   :password "postgres"})
+   :password "pwd"})
 
 ;; Test datasource
 (def test-datasource (jdbc/get-datasource test-db-spec))

@@ -5,7 +5,7 @@
             [otus-18.homework.db :as db]
             [otus-18.homework.query :as query]
             [otus-18.homework.migrations :as migrations]
-            [com.github.seancorfield.honeysql :as hsql]))
+            [honey.sql :as hsql]))
 
 ;; Test database configuration
 (def test-db-spec
@@ -14,7 +14,7 @@
    :host "localhost"
    :port 5432
    :user "postgres"
-   :password "postgres"})
+   :password "pwd"})
 
 ;; Test datasource
 (def test-datasource (jdbc/get-datasource test-db-spec))
