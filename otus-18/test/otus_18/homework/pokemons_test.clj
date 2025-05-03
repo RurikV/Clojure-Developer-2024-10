@@ -7,7 +7,14 @@
 
 (deftest get-pokemons-test
   (with-global-fake-routes-in-isolation
-    {{:address "https://pokeapi.co/api/v2/pokemon" :query-params {:limit 50 :lang "ja"}}
+    {"https://pokeapi.co/api/v2/type"
+     (fn [_request]
+       {:status 200
+        :body (cheshire/generate-string
+               {:results
+                [{:name "electric"
+                  :url "https://pokeapi.co/api/v2/type/electric"}]})})
+     "https://pokeapi.co/api/v2/pokemon?limit=50"
      (fn [_request]
        {:status 200
         :body (cheshire/generate-string
@@ -22,7 +29,7 @@
                 :types [{:slot 1
                          :type {:name "electric",
                                 :url "https://pokeapi.co/api/v2/type/13/"}}]})})
-    {:address "https://pokeapi.co/api/v2/pokemon/1/" :query-params {:lang "ja"}}
+    "https://pokeapi.co/api/v2/pokemon/1/"
      (fn [_request]
        {:status 200
         :body (cheshire/generate-string
@@ -41,8 +48,9 @@
     (fn [_request]
       {:status 200
        :body (cheshire/generate-string
-              {:names {:language {:name "ja",
-                                  :url "https://pokeapi.co/api/v2/language/11/"}}})})}
+              {:names [{:language {:name "ja",
+                                  :url "https://pokeapi.co/api/v2/language/11/"},
+                        :name "でんき"}]})})}
 
     (is (= {"pikachu" ["でんき"]}
            (subject/get-pokemons :lang "ja")))))
