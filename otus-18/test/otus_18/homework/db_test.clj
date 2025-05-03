@@ -56,11 +56,11 @@
                                {:return-keys true})]
     ;; Associate pokemons with types
     (sql/insert! test-datasource :pokemon_types
-                 {:pokemon_id (:id pikachu)
-                  :type_id (:id electric)})
+                 {:pokemon_id (:pokemons/id pikachu)
+                  :type_id (:types/id electric)})
     (sql/insert! test-datasource :pokemon_types
-                 {:pokemon_id (:id charizard)
-                  :type_id (:id fire)})))
+                 {:pokemon_id (:pokemons/id charizard)
+                  :type_id (:types/id fire)})))
 
 ;; Tests for database operations
 (deftest test-save-type

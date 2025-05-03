@@ -66,25 +66,25 @@
                                {:return-keys true})]
     ;; Associate pokemons with types
     (sql/insert! test-datasource :pokemon_types
-                 {:pokemon_id (:id pikachu)
-                  :type_id (:id electric)})
+                 {:pokemon_id (:pokemons/id pikachu)
+                  :type_id (:types/id electric)})
     (sql/insert! test-datasource :pokemon_types
-                 {:pokemon_id (:id charizard)
-                  :type_id (:id fire)})
+                 {:pokemon_id (:pokemons/id charizard)
+                  :type_id (:types/id fire)})
     (sql/insert! test-datasource :pokemon_types
-                 {:pokemon_id (:id blastoise)
-                  :type_id (:id water)})
+                 {:pokemon_id (:pokemons/id blastoise)
+                  :type_id (:types/id water)})
     ;; Add a second type to charizard
     (sql/insert! test-datasource :pokemon_types
-                 {:pokemon_id (:id charizard)
-                  :type_id (:id water)})))
+                 {:pokemon_id (:pokemons/id charizard)
+                  :type_id (:types/id water)})))
 
 ;; Tests for query constructor
 (deftest test-build-query
   (testing "Building a query with type-name parameter"
     (let [query (query/build-query :type-name "electric")
           sql-map (hsql/format query)
-          expected-sql ["SELECT p.name, p.url FROM pokemons p JOIN pokemon_types pt ON p.id = pt.pokemon_id JOIN types t ON pt.type_id = t.id WHERE t.name = ? ORDER BY name LIMIT ? OFFSET ?" "electric" 10 0]]
+          expected-sql ["SELECT p.name, p.url FROM pokemons AS p INNER JOIN pokemon_types AS pt ON p.id = pt.pokemon_id INNER JOIN types AS t ON pt.type_id = t.id WHERE t.name = ? ORDER BY name ASC LIMIT ? OFFSET ?" "electric" 10 0]]
       (is (= expected-sql sql-map)))))
 
 (deftest test-get-all-types
@@ -135,5 +135,5 @@
                  :order-by [:p.name]
                  :limit 5)
           sql-map (hsql/format query)
-          expected-sql ["SELECT p.name, t.name FROM pokemons p JOIN pokemon_types pt ON p.id = pt.pokemon_id JOIN types t ON pt.type_id = t.id WHERE t.name = ? ORDER BY p.name LIMIT ?" "electric" 5]]
+          expected-sql ["SELECT p.name, t.name FROM pokemons AS p INNER JOIN pokemon_types AS pt ON p.id = pt.pokemon_id INNER JOIN types AS t ON pt.type_id = t.id WHERE t.name = ? ORDER BY p.name ASC LIMIT ? OFFSET ?" "electric" 5 0]]
       (is (= expected-sql sql-map)))))

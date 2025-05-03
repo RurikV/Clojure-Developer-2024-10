@@ -39,35 +39,53 @@
   "Get Pokemon by type"
   [type-name & {:keys [limit offset]
                 :or {limit 10 offset 0}}]
-  (execute-query (build-query :type-name type-name
-                              :limit limit
-                              :offset offset)))
+  (let [results (sql/query db/datasource
+                          ["SELECT p.name, p.url
+                            FROM pokemons p
+                            JOIN pokemon_types pt ON p.id = pt.pokemon_id
+                            JOIN types t ON pt.type_id = t.id
+                            WHERE t.name = ?
+                            ORDER BY p.name
+                            LIMIT ? OFFSET ?"
+                           type-name limit offset])]
+    (map (fn [row]
+           {:p/name (:pokemons/name row)
+            :p/url (:pokemons/url row)})
+         results)))
 
 ;; Get Pokemon count by type
 (defn get-pokemon-count-by-type
   "Get the number of Pokemon of each type"
   []
-  (sql/query db/datasource
-             ["SELECT t.name, COUNT(pt.pokemon_id) as count
-               FROM types t
-               JOIN pokemon_types pt ON t.id = pt.type_id
-               GROUP BY t.name
-               ORDER BY count DESC"]))
+  (let [results (sql/query db/datasource
+                          ["SELECT t.name, COUNT(pt.pokemon_id) as count
+                            FROM types t
+                            JOIN pokemon_types pt ON t.id = pt.type_id
+                            GROUP BY t.name
+                            ORDER BY count DESC"])]
+    (map (fn [row]
+           {:t/name (:types/name row)
+            :count (:count row)})
+         results)))
 
 ;; Get Pokemon with multiple types
 (defn get-pokemons-with-multiple-types
   "Get Pokemon with multiple types"
   [& {:keys [limit offset]
       :or {limit 10 offset 0}}]
-  (sql/query db/datasource
-             ["SELECT p.name, COUNT(pt.type_id) as type_count
-               FROM pokemons p
-               JOIN pokemon_types pt ON p.id = pt.pokemon_id
-               GROUP BY p.name
-               HAVING COUNT(pt.type_id) > 1
-               ORDER BY type_count DESC
-               LIMIT ? OFFSET ?"
-              limit offset]))
+  (let [results (sql/query db/datasource
+                          ["SELECT p.name, COUNT(pt.type_id) as type_count
+                            FROM pokemons p
+                            JOIN pokemon_types pt ON p.id = pt.pokemon_id
+                            GROUP BY p.name
+                            HAVING COUNT(pt.type_id) > 1
+                            ORDER BY type_count DESC
+                            LIMIT ? OFFSET ?"
+                           limit offset])]
+    (map (fn [row]
+           {:p/name (:pokemons/name row)
+            :type_count (:type_count row)})
+         results)))
 
 ;; Get Pokemon types distribution
 (defn get-type-distribution
@@ -89,12 +107,19 @@
            from [[:pokemons :p]]
            limit 10
            offset 0}}]
-  (cond-> (apply h/select select)
-    from (apply h/from from)
-    join (apply h/join join)
-    where (h/where where)
-    group-by (apply h/group-by group-by)
-    having (h/having having)
-    order-by (h/order-by order-by)
-    limit (h/limit limit)
-    offset (h/offset offset)))
+  (let [query (apply h/select select)
+        query (if from (apply h/from query from) query)
+        query (if join
+                (let [join-pairs (partition 2 join)]
+                  (reduce (fn [q [table condition]]
+                            (h/join q table condition))
+                          query
+                          join-pairs))
+                query)
+        query (if where (h/where query where) query)
+        query (if group-by (apply h/group-by query group-by) query)
+        query (if having (h/having query having) query)
+        query (if order-by (h/order-by query order-by) query)
+        query (if limit (h/limit query limit) query)
+        query (if offset (h/offset query offset) query)]
+    query))
