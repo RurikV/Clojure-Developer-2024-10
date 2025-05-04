@@ -1,5 +1,5 @@
-{:duct.database/sql
- {:connection-uri #duct/env ["DATABASE_URL" Str]}}
+{:duct.module/sql
+ {:database-url #duct/env ["DATABASE_URL" Str]}}
 
  :duct.migrator/ragtime
  {:migrations []}
@@ -10,4 +10,4 @@
   :pokemons-url "https://pokeapi.co/api/v2/pokemon"
   :type-path "https://pokeapi.co/api/v2/type"
   :limit 100  ; Higher limit for production
-  :lang "en"}}
+  :lang "en"}

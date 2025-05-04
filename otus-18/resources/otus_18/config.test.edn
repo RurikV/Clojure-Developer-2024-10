@@ -1,5 +1,5 @@
-{:duct.database/sql
- {:connection-uri "jdbc:postgresql://localhost:5432/pokemon_test_db?user=postgres&password=pwd"}}
+{:duct.module/sql
+ {:database-url "jdbc:postgresql://localhost:5432/pokemon_test_db?user=postgres&password=pwd"}}
 
  :duct.migrator/ragtime
  {:migrations []}
@@ -16,4 +16,4 @@
                       "fire" {:name "fire" :localized_name "Fire"}
                       "flying" {:name "flying" :localized_name "Flying"}}
               :pokemon-types {"pikachu" ["electric"]
-                             "charizard" ["fire" "flying"]}}}}
+                             "charizard" ["fire" "flying"]}}}
