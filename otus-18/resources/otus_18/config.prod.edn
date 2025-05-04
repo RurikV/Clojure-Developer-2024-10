@@ -1,0 +1,13 @@
+{:duct.database/sql
+ {:connection-uri #duct/env ["DATABASE_URL" Str]}
+
+ :duct.migrator/ragtime
+ {:migrations []}
+
+ ;; Override with production-specific settings
+ [:otus-18.infrastructure.api/pokemon-api :otus-18.infrastructure.api/client]
+ {:base-url "https://pokeapi.co/api/v2"
+  :pokemons-url "https://pokeapi.co/api/v2/pokemon"
+  :type-path "https://pokeapi.co/api/v2/type"
+  :limit 100  ; Higher limit for production
+  :lang "en"}}

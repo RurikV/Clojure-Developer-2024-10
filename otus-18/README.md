@@ -1,98 +1,145 @@
-### Урок #18
+# Pokemon Application with Hexagonal Architecture
 
-## Часть 1: Асинхронная работа с Pokemon API
+This project demonstrates the use of hexagonal architecture (ports and adapters) in a Clojure application that interacts with the Pokemon API and stores data in a PostgreSQL database.
 
-core.async
+## Architecture Overview
 
-https://github.com/clojure/core.async
+The application is structured according to the principles of hexagonal architecture:
 
-API Docs
+### Domain Layer
+- Core business logic and entities
+- Domain protocols (ports)
 
-https://clojure.github.io/core.async/
+### Application Layer
+- Use cases that orchestrate domain entities
+- Services that implement business operations
 
-### ДЗ
-#### Научиться работать с https://pokeapi.co/ в асинхронном стиле.
+### Infrastructure Layer
+- External systems implementations (API client, database repository)
+- Adapters for external systems
 
-- Научиться получать список покемонов — это отправная точка для сбора информации.
-- Получить для каждого покемона, упомянутого в ответе на первый запрос, его имя, наименования типов на заданном языке (их может быть несколько). Эти данные можно получить асинхронно, но результата следует подождать и сохранить оный в подходящие структуры данных.
-- Типы покемонов — справочные данные. Следует озаботиться получением полного перечня типов с их наименованиями, чтобы затем только обращаться к сохранённому справочнику при добавлении наименований типов к данным покемона.
+### Boundary Layer
+- Adapters that connect the application to external systems
 
-## Часть 2: Работа с данными по покемонам в базе Postgres
+## Technologies Used
 
-### Цель
-Научиться работать с распространёнными библиотеками для работы с реляционными базами данных.
+- [Clojure](https://clojure.org/) - Programming language
+- [Integrant](https://github.com/weavejester/integrant) - Dependency injection and lifecycle management
+- [Duct](https://github.com/duct-framework/duct) - Application framework
+- [next.jdbc](https://cljdoc.org/d/com.github.seancorfield/next.jdbc/1.3.874/doc/readme) - Database access
+- [ragtime](https://github.com/weavejester/ragtime) - Database migrations
+- [honeysql](https://cljdoc.org/d/com.github.seancorfield/honeysql/2.4.1026/doc/readme) - SQL query builder
+- [core.async](https://github.com/clojure/core.async) - Asynchronous programming
+- [clj-http](https://github.com/dakrone/clj-http) - HTTP client
+- [PostgreSQL](https://www.postgresql.org/) - Database
 
-### Описание
-- Написать миграции для схемы базы данных
-- Используя библиотеку ragtime применить миграции
-- Сохранить данные по покемонам в базу данных
-- Используя библиотеку honey-sql сделать конструктор запросов к базе данных
+## Setup and Configuration
 
-### Используемые библиотеки
-- [next.jdbc](https://cljdoc.org/d/com.github.seancorfield/next.jdbc/1.3.874/doc/readme) - для работы с базой данных
-- [ragtime](https://github.com/weavejester/ragtime) - для миграций
-- [honeysql](https://cljdoc.org/d/com.github.seancorfield/honeysql/2.4.1026/doc/readme) - для построения SQL запросов
-
-### Инструкция по запуску
-
-#### Настройка базы данных
-1. Установите PostgreSQL, если он еще не установлен
-2. Создайте базу данных `pokemon_db`:
+### Database Setup
+1. Install PostgreSQL if not already installed
+2. Create a database:
    ```sql
    CREATE DATABASE pokemon_db;
    ```
-3. Настройте подключение к базе данных в файле `src/otus_18/homework/db.clj`, изменив параметры в `db-spec` при необходимости
+3. For testing, create a test database:
+   ```sql
+   CREATE DATABASE pokemon_test_db;
+   ```
 
-#### Применение миграций
-```clojure
-(require '[otus-18.homework.migrations :as migrations])
-(require '[otus-18.homework.db :as db])
+### Environment Configuration
+The application uses different configurations for development, production, and testing environments:
 
-;; Применить миграции
-(migrations/migrate db/db-spec)
+- **Development**: Uses a local database and limits API requests
+- **Production**: Uses environment variables for database connection and has higher API request limits
+- **Testing**: Uses mock implementations for external dependencies
 
-;; Откатить последнюю миграцию (если нужно)
-(migrations/rollback db/db-spec)
+## Running the Application
 
-;; Откатить все миграции (если нужно)
-(migrations/rollback-all db/db-spec)
+### Development Mode
+```bash
+# Start a REPL
+lein repl
+
+# In the REPL
+(require 'dev)
+(in-ns 'dev)
+(go)  # Start the system
+
+# Load Pokemon data
+(def service (get system :otus-18.application/service))
+(require '[otus-18.application.pokemon-service :as service])
+(service/load-pokemons-to-db! service 10 "en")
+
+# Query data
+(service/get-pokemons-by-type service "electric")
 ```
 
-#### Загрузка данных в базу
-```clojure
-(require '[otus-18.homework.db :as db])
+### Production Mode
+```bash
+# Set environment variables
+export DATABASE_URL=jdbc:postgresql://localhost:5432/pokemon_db?user=postgres&password=pwd
 
-;; Загрузить данные о покемонах в базу
-(db/load-pokemons-to-db! :limit 50 :lang "ja")
+# Run the application
+lein run
 ```
 
-#### Выполнение запросов
-```clojure
-(require '[otus-18.homework.query :as query])
+### Testing
+```bash
+# Run all tests
+lein test
 
-;; Получить все типы покемонов
-(query/get-all-types)
-
-;; Получить покемонов определенного типа
-(query/get-pokemons-by-type "electric")
-
-;; Получить количество покемонов каждого типа
-(query/get-pokemon-count-by-type)
-
-;; Получить покемонов с несколькими типами
-(query/get-pokemons-with-multiple-types)
-
-;; Получить распределение типов покемонов
-(query/get-type-distribution)
-
-;; Построить произвольный запрос
-(query/execute-query 
-  (query/custom-query
-    :select [:p.name :t.name]
-    :from [[:pokemons :p]]
-    :join [[:pokemon_types :pt] [:= :p.id :pt.pokemon_id]
-           [:types :t] [:= :pt.type_id :t.id]]
-    :where [:= :t.name "electric"]
-    :order-by [:p.name]
-    :limit 5))
+# Run specific tests
+lein test otus-18.application.pokemon-service-test
 ```
+
+## API Examples
+
+### Get Pokemon by Name
+```clojure
+(require '[otus-18.application.pokemon-service :as service])
+(def system (integrant.repl/system))
+(def pokemon-service (get system :otus-18.application/service))
+
+(service/get-pokemon pokemon-service "pikachu")
+```
+
+### Get Pokemons by Type
+```clojure
+(service/get-pokemons-by-type pokemon-service "electric")
+```
+
+### Load Pokemons to Database
+```clojure
+(service/load-pokemons-to-db! pokemon-service 50 "en")
+```
+
+## Testing with Mock Implementations
+
+The application uses dependency injection to make testing easier. In tests, mock implementations of the API client and repository are used:
+
+```clojure
+(def config
+  {:otus-18.infrastructure.api/pokemon-api-mock
+   {:mock-data {"pikachu" ["electric"]}}
+
+   :otus-18.infrastructure.db/pokemon-repository-mock
+   {:mock-data {:pokemons {"pikachu" {:name "pikachu"}}}}
+
+   :otus-18.application/service
+   {:repository #ig/ref :otus-18.domain/repository
+    :api-adapter #ig/ref :otus-18.boundary.api/adapter}})
+
+(def system (ig/init config))
+(def service (get system :otus-18.application/service))
+
+(service/get-pokemon service "pikachu")
+```
+
+## Project History
+
+This project evolved through several stages:
+
+1. **Initial Version**: Asynchronous interaction with the Pokemon API
+2. **Database Integration**: Added PostgreSQL storage and query capabilities
+3. **Hexagonal Architecture**: Restructured the code according to hexagonal architecture principles
+4. **Dependency Injection**: Added Integrant and Duct for dependency injection and configuration

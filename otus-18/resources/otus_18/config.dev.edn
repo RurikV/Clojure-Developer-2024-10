@@ -1,0 +1,13 @@
+{:duct.database/sql
+ {:connection-uri "jdbc:postgresql://localhost:5432/pokemon_db?user=postgres&password=pwd"}
+
+ :duct.migrator/ragtime
+ {:migrations []}
+
+ ;; Override with development-specific settings
+ [:otus-18.infrastructure.api/pokemon-api :otus-18.infrastructure.api/client]
+ {:base-url "https://pokeapi.co/api/v2"
+  :pokemons-url "https://pokeapi.co/api/v2/pokemon"
+  :type-path "https://pokeapi.co/api/v2/type"
+  :limit 10  ; Limit API requests during development
+  :lang "en"}}
