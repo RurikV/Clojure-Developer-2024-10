@@ -56,23 +56,35 @@ The application uses different configurations for development, production, and t
 ## Running the Application
 
 ### Development Mode
+
+First, make sure you have all the required dependencies:
+
+```bash
+# Install dependencies
+lein deps
+```
+
+Then start a REPL:
+
 ```bash
 # Start a REPL
 lein repl
 
 # In the REPL
-(require 'dev)
-(in-ns 'dev)
-(go)  # Start the system
+user=> (require 'dev)
+user=> (in-ns 'dev)
+dev=> (go)  # Start the system
 
 # Load Pokemon data
-(def service (get system :otus-18.application/service))
-(require '[otus-18.application.pokemon-service :as service])
-(service/load-pokemons-to-db! service 10 "en")
+dev=> (def service (get system :otus-18.application/service))
+dev=> (require '[otus-18.application.pokemon-service :as service])
+dev=> (service/load-pokemons-to-db! service 10 "en")
 
 # Query data
-(service/get-pokemons-by-type service "electric")
+dev=> (service/get-pokemons-by-type service "electric")
 ```
+
+If you encounter any errors about missing dependencies, make sure you're using the latest version of the project.clj file which includes all necessary development dependencies.
 
 ### Production Mode
 ```bash

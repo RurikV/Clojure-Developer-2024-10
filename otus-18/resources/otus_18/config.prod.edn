@@ -1,5 +1,5 @@
 {:duct.database/sql
- {:connection-uri #duct/env ["DATABASE_URL" Str]}
+ {:connection-uri #duct/env ["DATABASE_URL" Str]}}
 
  :duct.migrator/ragtime
  {:migrations []}

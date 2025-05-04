@@ -31,7 +31,11 @@
                  :resource-paths ["dev/resources"]
                  :dependencies [[integrant/repl "0.3.3"]
                                [eftest "0.5.9"]
-                               [kerodon "0.9.1"]]}
+                               [kerodon "0.9.1"]
+                               [hawk "0.2.11"]
+                               [clojure.java-time "1.2.0"]
+                               [org.clojure/tools.namespace "1.4.4"]
+                               [fipp "0.6.26"]]}
    :uberjar {:prep-tasks ["javac" "compile" ["run" ":duct/compiler"]]
              :aot :all
              :uberjar-name "otus-18.jar"}})

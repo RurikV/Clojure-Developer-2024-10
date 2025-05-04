@@ -1,5 +1,5 @@
 {:duct.database/sql
- {:connection-uri "jdbc:postgresql://localhost:5432/pokemon_test_db?user=postgres&password=pwd"}
+ {:connection-uri "jdbc:postgresql://localhost:5432/pokemon_test_db?user=postgres&password=pwd"}}
 
  :duct.migrator/ragtime
  {:migrations []}
