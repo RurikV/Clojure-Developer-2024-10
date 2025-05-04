@@ -1,4 +1,4 @@
-{:database-uri #env DATABASE_URI
+{:connection-uri #env DATABASE_URI
  :database     #envf ["protocol://%s:%s" DATABASE_HOST DATABASE_NAME]
  :port         #or [#env PORT 8080]
 

@@ -5,7 +5,7 @@
 
   ;; Database and migrations
   :duct.module/sql
-  {:database-url "jdbc:postgresql://localhost:5432/pokemon_db?user=postgres&password=pwd"}
+  {:connection-uri "jdbc:postgresql://localhost:5432/pokemon_db?user=postgres&password=pwd"}
 
   :duct.migrator/ragtime
   {:migrations []}
@@ -28,6 +28,7 @@
   {:db #ig/ref :duct.database/sql
    :migrations-config {:datastore #ig/ref :duct.migrator/ragtime
                       :migrations "migrations"}}
+
 
   ;; Boundary - API Adapter
   [:otus-18.boundary.api/pokemon-api-adapter :otus-18.boundary.api/adapter]
