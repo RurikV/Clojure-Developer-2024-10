@@ -91,9 +91,11 @@
       (let [pokemon-url (str pokemons/pokemons-url "/" pokemon-name)
             pokemon (or (get-pokemon-by-name pokemon-name)
                         (save-pokemon! pokemon-name pokemon-url))
-            pokemon-types (get-pokemon-types pokemon-name)]
+            pokemon-types (get-pokemon-types pokemon-name)
+            pokemon-id (or (:pokemons/id pokemon) (:id pokemon))]
         (doseq [[i type-name] (map-indexed vector pokemon-types)]
           (let [localized-name (nth type-names i nil)
                 type-data (or (get-type-by-name type-name)
-                              (save-type! type-name localized-name))]
-            (associate-pokemon-with-type! (:id pokemon) (:id type-data))))))))
+                              (save-type! type-name localized-name))
+                type-id (or (:types/id type-data) (:id type-data))]
+            (associate-pokemon-with-type! pokemon-id type-id)))))))
