@@ -1,0 +1,48 @@
+{:duct.profile/base
+ {:duct.core/project-ns otus-18
+
+  :duct.module/logging {}
+
+  ;; Database and migrations
+  :duct.module/sql
+  {:connection-uri "jdbc:postgresql://localhost:5432/pokemon_db?user=postgres&password=pwd"}
+
+  :duct.migrator/ragtime
+  {:migrations []}
+
+  ;; Domain
+
+  ;; Application
+  [:otus-18.application/pokemon-service :otus-18.application/service]
+  {:repository #ig/ref :otus-18.domain/repository
+   :api-adapter #ig/ref :otus-18.boundary.api/adapter}
+
+  ;; Infrastructure - API
+  [:otus-18.infrastructure.api/pokemon-api :otus-18.infrastructure.api/client]
+  {:base-url "https://pokeapi.co/api/v2"
+   :pokemons-url "https://pokeapi.co/api/v2/pokemon"
+   :type-path "https://pokeapi.co/api/v2/type"}
+
+  ;; Infrastructure - Database
+  [:otus-18.infrastructure.db/pokemon-repository :otus-18.domain/repository]
+  {:db #ig/ref :duct.database/sql
+   :migrations-config {:datastore #ig/ref :duct.migrator/ragtime
+                      :migrations "migrations"}}
+
+
+  ;; Boundary - API Adapter
+  [:otus-18.boundary.api/pokemon-api-adapter :otus-18.boundary.api/adapter]
+  {:api-client #ig/ref :otus-18.infrastructure.api/client}
+
+  ;; Boundary - DB Adapter
+  [:otus-18.boundary.db/pokemon-repository-adapter :otus-18.boundary.db/adapter]
+  {:repository #ig/ref :otus-18.domain/repository}}
+
+ :duct.profile/dev
+ {:duct.core/include ["otus_18/config.dev.edn"]}
+
+ :duct.profile/prod
+ {:duct.core/include ["otus_18/config.prod.edn"]}
+
+ :duct.profile/test
+ {:duct.core/include ["otus_18/config.test.edn"]}}

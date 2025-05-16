@@ -1,0 +1,19 @@
+{:duct.module/sql
+ {:connection-uri "jdbc:postgresql://localhost:5432/pokemon_test_db?user=postgres&password=pwd"}
+
+ :duct.migrator/ragtime
+ {:migrations []}
+
+ ;; Use mock implementations for testing
+ [:otus-18.infrastructure.api/pokemon-api-mock :otus-18.infrastructure.api/client]
+ {:mock-data {"pikachu" ["electric"]
+              "charizard" ["fire" "flying"]}}
+
+ [:otus-18.infrastructure.db/pokemon-repository-mock :otus-18.domain/repository]
+ {:mock-data {:pokemons {"pikachu" {:name "pikachu" :url "https://pokeapi.co/api/v2/pokemon/pikachu"}
+                         "charizard" {:name "charizard" :url "https://pokeapi.co/api/v2/pokemon/charizard"}}
+              :types {"electric" {:name "electric" :localized_name "Electric"}
+                      "fire" {:name "fire" :localized_name "Fire"}
+                      "flying" {:name "flying" :localized_name "Flying"}}
+              :pokemon-types {"pikachu" ["electric"]
+                             "charizard" ["fire" "flying"]}}}}
