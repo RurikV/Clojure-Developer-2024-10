@@ -12,7 +12,7 @@
 (def ^:const log-dir "./logs")
 
 ;; Create a fixed thread pool for parallel processing
-(def thread-pool (Executors/newFixedThreadPool 
+(defonce thread-pool (Executors/newFixedThreadPool 
                   (+ 14 (.. Runtime getRuntime availableProcessors))))
 
 ;; Add a shutdown hook to ensure the thread pool is properly shut down
