@@ -15,16 +15,21 @@
 (defonce thread-pool (Executors/newFixedThreadPool 
                   (+ 14 (.. Runtime getRuntime availableProcessors))))
 
-;; Add a shutdown hook to ensure the thread pool is properly shut down
-(.addShutdownHook (Runtime/getRuntime)
-                 (Thread. ^Runnable
-                          (fn []
-                            (println "Shutting down thread pool...")
-                            (.shutdown thread-pool)
-                            ;; Wait for tasks to complete
-                            (when-not (.awaitTermination thread-pool 5 java.util.concurrent.TimeUnit/SECONDS)
-                              (println "Forcing thread pool shutdown...")
-                              (.shutdownNow thread-pool)))))
+;; Function to initialize thread pool shutdown hook
+;; This should be called once at application startup
+(defn init-thread-pool []
+  ;; Add a shutdown hook to ensure the thread pool is properly shut down
+  (.addShutdownHook (Runtime/getRuntime)
+                   (Thread. ^Runnable
+                            (fn []
+                              (println "Shutting down thread pool...")
+                              (.shutdown thread-pool)
+                              ;; Wait for tasks to complete
+                              (when-not (.awaitTermination thread-pool 5 java.util.concurrent.TimeUnit/SECONDS)
+                                (println "Forcing thread pool shutdown...")
+                                (.shutdownNow thread-pool)))))
+  ;; Return the thread pool for convenience
+  thread-pool)
 
 ;; Define a function to submit tasks to the thread pool and return a future
 (defn submit-task [^Runnable task]
